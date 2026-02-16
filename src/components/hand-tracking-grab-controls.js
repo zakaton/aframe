@@ -38,6 +38,14 @@ registerComponent('hand-tracking-grab-controls', {
     this.el.addEventListener('pinchended', this.onPinchEnded);
   },
 
+  setDisabled: function (disabled) {
+    if (disabled) {
+      this.onCollisionEnded();
+      this.onPinchEnded();
+    }
+    this.disabled = disabled;
+  },
+
   transferEntityOwnership: function () {
     var grabbingElComponent;
     var grabbingEls = this.el.sceneEl.querySelectorAll('[hand-tracking-grab-controls]');
@@ -52,6 +60,8 @@ registerComponent('hand-tracking-grab-controls', {
   },
 
   onCollisionStarted: function (evt) {
+    if (evt.target !== this.el) { return; }
+    if (this.disabled) { return; }
     var withEl = evt.detail.withEl;
     if (this.collidedEl) { return; }
     if (!withEl.getAttribute('grabbable')) { return; }
@@ -62,7 +72,11 @@ registerComponent('hand-tracking-grab-controls', {
     }
   },
 
-  onCollisionEnded: function () {
+  onCollisionEnded: function (evt) {
+    if (evt) {
+      if (evt.target !== this.el) { return; }
+    }
+    if (this.disabled) { return; }
     this.collidedEl = undefined;
     if (this.grabbedEl) { return; }
     this.grabbingObject3D = undefined;
@@ -72,6 +86,7 @@ registerComponent('hand-tracking-grab-controls', {
   },
 
   onPinchStarted: function (evt) {
+    if (this.disabled) { return; }
     if (!this.collidedEl) { return; }
     this.grabbedEl = this.collidedEl;
     this.transferEntityOwnership();
@@ -79,6 +94,7 @@ registerComponent('hand-tracking-grab-controls', {
   },
 
   onPinchEnded: function () {
+    if (this.disabled) { return; }
     this.releaseGrabbedEntity();
   },
 

@@ -4,10 +4,10 @@ import { registerComponent } from '../core/component.js';
 
 registerComponent('obb-collider', {
   schema: {
-    size: {default: 0},
-    trackedObject3D: {default: ''},
-    minimumColliderDimension: {default: 0.02},
-    centerModel: {default: false}
+    size: { default: 0 },
+    trackedObject3D: { default: '' },
+    minimumColliderDimension: { default: 0.02 },
+    centerModel: { default: false }
   },
 
   init: function () {
@@ -38,7 +38,9 @@ registerComponent('obb-collider', {
   },
 
   onModelLoaded: function () {
-    if (this.data.centerModel) { this.centerModel(); }
+    if (this.data.centerModel) {
+      this.centerModel();
+    }
     this.updateCollider();
   },
 
@@ -48,20 +50,22 @@ registerComponent('obb-collider', {
     var box;
     var center;
 
-    if (!model) { return; }
+    if (!model) {
+      return;
+    }
     this.el.removeObject3D('mesh');
     box = new THREE.Box3().setFromObject(model);
     center = box.getCenter(new THREE.Vector3());
-    model.position.x += (model.position.x - center.x);
-    model.position.y += (model.position.y - center.y);
-    model.position.z += (model.position.z - center.z);
+    model.position.x += model.position.x - center.x;
+    model.position.y += model.position.y - center.y;
+    model.position.z += model.position.z - center.z;
     this.el.setObject3D('mesh', model);
   },
 
   updateCollider: function () {
     var el = this.el;
     var boundingBoxSize = this.boundingBoxSize;
-    var aabb = this.aabb = this.aabb || new OBB();
+    var aabb = (this.aabb = this.aabb || new OBB());
     this.obb = this.obb || new OBB();
 
     // Defer if entity has not yet loaded.
@@ -97,7 +101,9 @@ registerComponent('obb-collider', {
   },
 
   hideCollider: function () {
-    if (!this.renderColliderMesh) { return; }
+    if (!this.renderColliderMesh) {
+      return;
+    }
     this.renderColliderMesh.visible = false;
   },
 
@@ -107,12 +113,21 @@ registerComponent('obb-collider', {
     var renderColliderMesh;
 
     boundingBoxSize = this.boundingBoxSize;
-    renderColliderGeometry = this.renderColliderGeometry = new THREE.BoxGeometry(boundingBoxSize.x, boundingBoxSize.y, boundingBoxSize.z);
-    renderColliderMesh = this.renderColliderMesh = new THREE.Mesh(renderColliderGeometry, new THREE.MeshLambertMaterial({color: 0x00ff00, side: THREE.DoubleSide}));
+    renderColliderGeometry = this.renderColliderGeometry = new THREE.BoxGeometry(
+      boundingBoxSize.x,
+      boundingBoxSize.y,
+      boundingBoxSize.z
+    );
+    renderColliderMesh = this.renderColliderMesh = new THREE.Mesh(
+      renderColliderGeometry,
+      new THREE.MeshLambertMaterial({ color: 0x00ff00, side: THREE.DoubleSide })
+    );
     renderColliderMesh.matrixAutoUpdate = false;
     renderColliderMesh.matrixWorldAutoUpdate = false;
     // THREE scene forces matrix world update even if matrixWorldAutoUpdate set to false.
-    renderColliderMesh.updateMatrixWorld = function () { /* no op */ };
+    renderColliderMesh.updateMatrixWorld = function () {
+      /* no op */
+    };
     this.el.sceneEl.object3D.add(renderColliderMesh);
   },
 
@@ -161,7 +176,7 @@ registerComponent('obb-collider', {
 
       // Restore rotations.
       trackedObject3D.parent.matrixWorld.compose(auxPosition, auxQuaternion, auxScale);
-      this.el.object3D.rotation.copy(auxEuler);
+      trackedObject3D.rotation.copy(auxEuler);
     };
   })(),
 
@@ -169,13 +184,13 @@ registerComponent('obb-collider', {
     var trackedObject3DPath = this.trackedObject3DPath;
     var trackedObject3D;
 
-    if (trackedObject3DPath &&
-        trackedObject3DPath.length &&
-        !this.trackedObject3D) {
+    if (trackedObject3DPath && trackedObject3DPath.length && !this.trackedObject3D) {
       trackedObject3D = this.el;
       for (var i = 0; i < trackedObject3DPath.length; i++) {
         trackedObject3D = trackedObject3D[trackedObject3DPath[i]];
-        if (!trackedObject3D) { break; }
+        if (!trackedObject3D) {
+          break;
+        }
       }
       if (trackedObject3D) {
         this.trackedObject3D = trackedObject3D;
@@ -196,16 +211,20 @@ registerComponent('obb-collider', {
       var renderColliderMesh = this.renderColliderMesh;
       var trackedObject3D = this.checkTrackedObject() || this.el.object3D;
 
-      if (!trackedObject3D) { return; }
+      if (!trackedObject3D) {
+        return;
+      }
 
       trackedObject3D.updateMatrix();
       trackedObject3D.updateMatrixWorld(true);
       trackedObject3D.matrixWorld.decompose(auxPosition, auxQuaternion, auxScale);
 
       // Recalculate collider if scale has changed.
-      if ((Math.abs(auxScale.x - this.previousScale.x) > 0.0001)  ||
-          (Math.abs(auxScale.y - this.previousScale.y) > 0.0001) ||
-          (Math.abs(auxScale.z - this.previousScale.z) > 0.0001)) {
+      if (
+        Math.abs(auxScale.x - this.previousScale.x) > 0.0001 ||
+        Math.abs(auxScale.y - this.previousScale.y) > 0.0001 ||
+        Math.abs(auxScale.z - this.previousScale.z) > 0.0001
+      ) {
         this.updateCollider();
       }
 
@@ -215,7 +234,9 @@ registerComponent('obb-collider', {
       auxScale.set(1, 1, 1);
       auxMatrix.compose(auxPosition, auxQuaternion, auxScale);
       // Update OBB visual representation.
-      if (renderColliderMesh) { renderColliderMesh.matrixWorld.copy(auxMatrix); }
+      if (renderColliderMesh) {
+        renderColliderMesh.matrixWorld.copy(auxMatrix);
+      }
 
       // Reset OBB with AABB and apply entity matrix. applyMatrix4 changes OBB internal state.
       obb.copy(this.aabb);
