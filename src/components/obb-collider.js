@@ -161,7 +161,12 @@ registerComponent('obb-collider', {
       auxEuler.copy(trackedObject3D.rotation);
       trackedObject3D.rotation.set(0, 0, 0);
 
-      trackedObject3D.parent.matrixWorld.decompose(auxPosition, auxQuaternion, auxScale);
+      trackedObject3D.parent.matrixWorld.decompose(
+        auxPosition,
+        auxQuaternion,
+        auxScale
+      );
+      auxPosition.y -= auxPosition.y / 2; // centering mesh
       auxMatrix.compose(auxPosition, identityQuaternion, auxScale);
       trackedObject3D.parent.matrixWorld.copy(auxMatrix);
 
